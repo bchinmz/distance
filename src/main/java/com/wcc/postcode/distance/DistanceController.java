@@ -1,6 +1,5 @@
 package com.wcc.postcode.distance;
 
-import com.wcc.postcode.PostcodeApplication;
 import com.wcc.postcode.distance.model.DistanceCalcResponse;
 import com.wcc.postcode.distance.model.PostCodeDetail;
 import com.wcc.postcode.repository.UKPostCodeEntity;
@@ -11,10 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -29,7 +25,7 @@ public class DistanceController {
     private DistanceCalculator distanceCalculator;
 
     @ResponseStatus(HttpStatus.OK)
-    @RequestMapping("/calc")
+    @GetMapping("/calc")
     public DistanceCalcResponse calcDistance(
             @RequestParam("start") String start,
             @RequestParam("end") String end) {
