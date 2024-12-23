@@ -14,6 +14,7 @@ import org.springframework.util.MultiValueMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -27,6 +28,7 @@ class DistanceControllerIntegrationTest {
     void calcDistance() throws Exception {
         var response = this.mockMvc.perform(
                 MockMvcRequestBuilders.get("/distances/calc")
+                        .with(httpBasic("user", "password"))
                         .queryParams(MultiValueMap.fromSingleValue(
                                 Map.of(
                                         "start", "AB10 1XG",

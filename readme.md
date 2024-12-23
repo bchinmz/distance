@@ -16,3 +16,11 @@ Add ons:
 - Integration test: DistanceControllerIntegrationTest
 - request to update coordinates based on post codes
 - log 2 postcodes for distance calculator request
+- add basic authentication
+
+
+
+#### Test credentials
+username: user
+
+password: password

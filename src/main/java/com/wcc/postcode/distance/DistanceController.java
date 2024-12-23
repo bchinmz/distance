@@ -6,6 +6,9 @@ import com.wcc.postcode.repository.UKPostCodeEntity;
 import com.wcc.postcode.repository.UKPostCodeRepository;
 import com.wcc.postcode.services.DistanceCalculator;
 import com.wcc.postcode.services.Position;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+@Tag(name = "Distances")
 @RestController
 @RequestMapping("/distances")
 public class DistanceController {
@@ -24,6 +28,7 @@ public class DistanceController {
     @Autowired
     private DistanceCalculator distanceCalculator;
 
+    @Operation(security = @SecurityRequirement(name = "basicAuth"))
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/calc")
     public DistanceCalcResponse calcDistance(

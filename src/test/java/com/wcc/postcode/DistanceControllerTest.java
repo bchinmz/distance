@@ -7,16 +7,13 @@ import com.wcc.postcode.distance.model.PostCodeDetail;
 import com.wcc.postcode.repository.UKPostCodeEntity;
 import com.wcc.postcode.repository.UKPostCodeRepository;
 import com.wcc.postcode.services.DistanceCalculator;
-import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.util.MultiValueMap;
 
 import java.util.Map;
@@ -24,13 +21,13 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(DistanceController.class)
+@WebMvcTest(value = {SecurityConfiguration.class, DistanceController.class})
 class DistanceControllerTest {
+    private static final RequestPostProcessor BASIC_AUTHENTICATION = httpBasic("user", "password");
     private final ObjectMapper objectMapper = new ObjectMapper();
     @Autowired
     private MockMvc mockMvc;
@@ -52,6 +49,7 @@ class DistanceControllerTest {
         when(distanceCalculator.calculate(any(), any())).thenReturn(5.0);
         var response = this.mockMvc.perform(
                 MockMvcRequestBuilders.get("/distances/calc")
+                        .with(BASIC_AUTHENTICATION)
                         .queryParams(MultiValueMap.fromSingleValue(
                                 Map.of(
                                         "start", "AB10 1XG",
@@ -77,9 +75,24 @@ class DistanceControllerTest {
     }
 
     @Test
+    void withoutAuthentication() throws Exception {
+        this.mockMvc.perform(
+                        MockMvcRequestBuilders.get("/distances/calc")
+                                .queryParams(MultiValueMap.fromSingleValue(
+                                        Map.of(
+                                                "start", "AB10 1XG",
+                                                "end", "AB10 6RN"
+                                        )
+                                ))
+                )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void missingParamTest() throws Exception {
         this.mockMvc.perform(
                         MockMvcRequestBuilders.get("/distances/calc")
+                                .with(BASIC_AUTHENTICATION)
                 )
                 .andExpect(status().isBadRequest());
     }
@@ -88,6 +101,7 @@ class DistanceControllerTest {
     void invalidPostCodesTest() throws Exception {
         this.mockMvc.perform(
                         MockMvcRequestBuilders.get("/distances/calc")
+                                .with(BASIC_AUTHENTICATION)
                                 .queryParams(MultiValueMap.fromSingleValue(
                                         Map.of(
                                                 "start", "AB10 1XG",

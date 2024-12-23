@@ -11,17 +11,20 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(PostcodeController.class)
+@WebMvcTest(value = {SecurityConfiguration.class, PostcodeController.class})
 class PostcodeControllerTest {
+    private static final RequestPostProcessor BASIC_AUTHENTICATION = httpBasic("user", "password");
 
     @Autowired
     private MockMvc mockMvc;
@@ -36,10 +39,19 @@ class PostcodeControllerTest {
         ));
         this.mockMvc.perform(
                         MockMvcRequestBuilders.get("/postcodes/test")
+                                .with(BASIC_AUTHENTICATION)
                 )
                 .andExpect(status().isOk())
                 .andExpect(content().string("""
                         {"postcode":"test","latitude":1.0,"longitude":2.0}"""));
+    }
+
+    @Test
+    void withoutAuthentication() throws Exception {
+        this.mockMvc.perform(
+                        MockMvcRequestBuilders.get("/postcodes/test")
+                )
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -49,6 +61,7 @@ class PostcodeControllerTest {
         ));
         this.mockMvc.perform(
                         MockMvcRequestBuilders.get("/postcodes/unknown")
+                                .with(BASIC_AUTHENTICATION)
                 )
                 .andExpect(status().isNotFound());
     }
@@ -61,6 +74,7 @@ class PostcodeControllerTest {
 
         this.mockMvc.perform(
                         MockMvcRequestBuilders.put("/postcodes/test")
+                                .with(BASIC_AUTHENTICATION)
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
@@ -85,6 +99,7 @@ class PostcodeControllerTest {
         ));
         this.mockMvc.perform(
                         MockMvcRequestBuilders.put("/postcodes/unknown")
+                                .with(BASIC_AUTHENTICATION)
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
